@@ -5,6 +5,7 @@ import com.smart.HostalManagementSystem.Entity.BaseEntity;
 import com.smart.HostalManagementSystem.Enums.HostelType;
 import com.smart.HostalManagementSystem.Enums.Status;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Hostel extends BaseEntity {
 
 
