@@ -3,14 +3,18 @@ package com.smart.HostalManagementSystem.Controller;
 
 import com.smart.HostalManagementSystem.DTO.LoginRequestDTO;
 import com.smart.HostalManagementSystem.DTO.LoginResponseDTO;
+import com.smart.HostalManagementSystem.DTO.RegisterRequestDTO;
 import com.smart.HostalManagementSystem.Entity.User;
+import com.smart.HostalManagementSystem.Repository.UserRepository;
 import com.smart.HostalManagementSystem.Service.JwtService;
 import com.smart.HostalManagementSystem.Service.UserService;
+import org.springframework.http.ResponseEntity;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -27,6 +31,11 @@ public class AuthController {
 
     private final JwtService jwtService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     public AuthController(
@@ -38,6 +47,36 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.jwtService = jwtService;
+
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(
+            @RequestBody RegisterRequestDTO request
+    ){
+        //for a testing
+        System.out.println("REGISTER API HIT");
+
+        User user = new User();
+
+        user.setUsername(request.getUsername());
+
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        user.setRole(request.getRole());
+
+
+        user.setEnabled(true);
+
+        user.setFirstLogin(true);
+
+
+        userRepository.save(user);
+
+
+        return ResponseEntity.ok("User Created Successfully");
 
     }
 
