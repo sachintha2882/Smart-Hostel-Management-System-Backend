@@ -47,8 +47,15 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/students/**").permitAll()
+                        .requestMatchers("/api/floors/**").permitAll()
+                        .requestMatchers("/api/hostels/**").permitAll()
+                        .requestMatchers("/api/rooms/**").permitAll()
+                        .requestMatchers("/api/allocations/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
+
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
@@ -68,8 +75,6 @@ public class SecurityConfig {
         return provider;
     }
 
-
-
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration
@@ -78,5 +83,4 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
 
     }
-
 }
