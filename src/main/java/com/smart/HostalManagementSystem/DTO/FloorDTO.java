@@ -14,5 +14,5 @@ public class FloorDTO {
 
     private int floorNumber;
 
-    private Long hostelId;
+    private Long buildingId;
 }

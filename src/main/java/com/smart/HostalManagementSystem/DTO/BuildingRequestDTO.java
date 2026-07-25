@@ -16,4 +16,9 @@ public class BuildingRequestDTO {
 
     private Long hostelId;
 
+    private Integer numberOfFloors;
+
+    private Integer roomsPerFloor;
+
+    private Integer roomCapacity;
 }

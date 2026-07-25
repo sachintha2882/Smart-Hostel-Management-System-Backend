@@ -2,6 +2,7 @@ package com.smart.HostalManagementSystem.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,6 +20,13 @@ public class Floor {
     private int floorNumber;
 
     @ManyToOne
-    @JoinColumn(name = "hostel_id")
-    private Hostel hostel;
+    @JoinColumn(name = "building_id",nullable = false)
+    private Building building ;
+
+    @OneToMany(
+            mappedBy = "floor",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Room> rooms;
 }

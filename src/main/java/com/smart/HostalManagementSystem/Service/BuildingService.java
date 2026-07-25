@@ -3,77 +3,142 @@ package com.smart.HostalManagementSystem.Service;
 
 import com.smart.HostalManagementSystem.DTO.BuildingRequestDTO;
 import com.smart.HostalManagementSystem.DTO.BuildingResponseDTO;
-import com.smart.HostalManagementSystem.Entity.Building;
-import com.smart.HostalManagementSystem.Entity.Hostel;
-import com.smart.HostalManagementSystem.Repository.BuildingRepository;
-import com.smart.HostalManagementSystem.Repository.HostelRepository;
+import com.smart.HostalManagementSystem.Entity.*;
+import com.smart.HostalManagementSystem.Repository.*;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
+@RequiredArgsConstructor
 public class BuildingService {
 
 
     private final BuildingRepository buildingRepository;
+
     private final HostelRepository hostelRepository;
 
+    private final FloorRepository floorRepository;
 
-    public BuildingService(
-            BuildingRepository buildingRepository,
-            HostelRepository hostelRepository
-    ) {
-
-        this.buildingRepository = buildingRepository;
-        this.hostelRepository = hostelRepository;
-
-    }
+    private final RoomRepository roomRepository;
 
 
 
-    // CREATE
+    // CREATE BUILDING + AUTO CREATE FLOOR + ROOM
+
     public BuildingResponseDTO createBuilding(
-            BuildingRequestDTO dto
-    ) {
+            BuildingRequestDTO request
+    ){
 
 
         Hostel hostel = hostelRepository
-                .findById(dto.getHostelId())
+                .findById(request.getHostelId())
                 .orElseThrow(
                         () -> new RuntimeException("Hostel not found")
                 );
+
 
 
         Building building = new Building();
 
+        building.setBuildingName(
+                request.getBuildingName()
+        );
 
-        building.setBuildingName(dto.getBuildingName());
-
-        building.setDescription(dto.getDescription());
+        building.setDescription(
+                request.getDescription()
+        );
 
         building.setHostel(hostel);
 
 
-        Building saved = buildingRepository.save(building);
+
+        Building savedBuilding =
+                buildingRepository.save(building);
 
 
-        return mapToDTO(saved);
+
+        // CREATE FLOORS
+
+        for(int i = 1; i <= request.getNumberOfFloors(); i++){
+
+
+            Floor floor = new Floor();
+
+            floor.setFloorName(
+                    "Floor " + i
+            );
+
+            floor.setFloorNumber(i);
+
+            floor.setBuilding(savedBuilding);
+
+
+
+            Floor savedFloor =
+                    floorRepository.save(floor);
+
+
+
+            // CREATE ROOMS
+
+            for(int j = 1; j <= request.getRoomsPerFloor(); j++){
+
+
+                Room room = new Room();
+
+
+                String roomNumber =
+                        i + String.format("%02d", j);
+
+
+                room.setRoomNumber(roomNumber);
+
+
+                room.setCapacity(
+                        request.getRoomCapacity()
+                );
+
+
+                room.setCurrentOccupancy(0);
+
+
+                room.setFloor(savedFloor);
+
+
+
+                roomRepository.save(room);
+
+
+            }
+
+        }
+
+
+
+        return convertToDTO(savedBuilding);
 
     }
 
 
 
 
-    // READ ALL
-    public List<BuildingResponseDTO> getAllBuildings() {
+
+
+    // GET ALL BUILDINGS
+
+    public List<BuildingResponseDTO> getAllBuildings(){
 
 
         return buildingRepository.findAll()
                 .stream()
-                .map(this::mapToDTO)
-                .toList();
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
 
     }
 
@@ -81,18 +146,20 @@ public class BuildingService {
 
 
 
-    // READ BY ID
-    public BuildingResponseDTO getBuildingById(Long id) {
+
+    // GET BUILDING BY ID
+
+    public BuildingResponseDTO getBuildingById(Long id){
 
 
-        Building building = buildingRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new RuntimeException("Building not found")
-                );
+        Building building =
+                buildingRepository.findById(id)
+                        .orElseThrow(
+                                () -> new RuntimeException("Building not found")
+                        );
 
 
-        return mapToDTO(building);
+        return convertToDTO(building);
 
     }
 
@@ -100,40 +167,33 @@ public class BuildingService {
 
 
 
-    // UPDATE
+
+
+
+    // UPDATE BUILDING
+
     public BuildingResponseDTO updateBuilding(
             Long id,
-            BuildingRequestDTO dto
-    ) {
+            BuildingRequestDTO request
+    ){
 
 
-        Building building = buildingRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new RuntimeException("Building not found")
-                );
-
-
-
-        Hostel hostel = hostelRepository
-                .findById(dto.getHostelId())
-                .orElseThrow(
-                        () -> new RuntimeException("Hostel not found")
-                );
+        Building building =
+                buildingRepository.findById(id)
+                        .orElseThrow(
+                                () -> new RuntimeException("Building not found")
+                        );
 
 
 
         building.setBuildingName(
-                dto.getBuildingName()
+                request.getBuildingName()
         );
 
 
         building.setDescription(
-                dto.getDescription()
+                request.getDescription()
         );
-
-
-        building.setHostel(hostel);
 
 
 
@@ -142,7 +202,7 @@ public class BuildingService {
 
 
 
-        return mapToDTO(updated);
+        return convertToDTO(updated);
 
     }
 
@@ -150,15 +210,18 @@ public class BuildingService {
 
 
 
-    // DELETE
-    public void deleteBuilding(Long id) {
 
 
-        Building building = buildingRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new RuntimeException("Building not found")
-                );
+    // DELETE BUILDING
+
+    public void deleteBuilding(Long id){
+
+
+        Building building =
+                buildingRepository.findById(id)
+                        .orElseThrow(
+                                () -> new RuntimeException("Building not found")
+                        );
 
 
         buildingRepository.delete(building);
@@ -169,26 +232,43 @@ public class BuildingService {
 
 
 
-    // ENTITY -> DTO conversion
-    private BuildingResponseDTO mapToDTO(
+
+
+    // ENTITY TO DTO CONVERTER
+
+    private BuildingResponseDTO convertToDTO(
             Building building
-    ) {
+    ){
 
 
-        return new BuildingResponseDTO(
+        BuildingResponseDTO dto =
+                new BuildingResponseDTO();
 
-                building.getId(),
 
-                building.getBuildingName(),
-
-                building.getDescription(),
-
-                building.getHostel().getId(),
-
-                building.getHostel().getHostelName()
-
+        dto.setId(
+                building.getId()
         );
 
+
+        dto.setBuildingName(
+                building.getBuildingName()
+        );
+
+
+        dto.setDescription(
+                building.getDescription()
+        );
+
+
+        dto.setHostelId(
+                building.getHostel().getId()
+        );
+
+
+        return dto;
+
     }
+
+
 
 }

@@ -14,16 +14,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/buildings")
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173")
 public class BuildingController {
 
 
     private final BuildingService buildingService;
 
 
-    public BuildingController(
-            BuildingService buildingService
-    ) {
+    public BuildingController(BuildingService buildingService) {
 
         this.buildingService = buildingService;
 
@@ -31,7 +29,8 @@ public class BuildingController {
 
 
 
-    // CREATE BUILDING
+    // CREATE BUILDING + AUTO FLOOR + ROOM CREATION
+
     @PostMapping
     public ResponseEntity<BuildingResponseDTO> createBuilding(
             @RequestBody BuildingRequestDTO dto
@@ -53,15 +52,14 @@ public class BuildingController {
 
 
     // GET ALL BUILDINGS
+
     @GetMapping
     public ResponseEntity<List<BuildingResponseDTO>> getAllBuildings() {
 
 
-        List<BuildingResponseDTO> buildings =
-                buildingService.getAllBuildings();
-
-
-        return ResponseEntity.ok(buildings);
+        return ResponseEntity.ok(
+                buildingService.getAllBuildings()
+        );
 
     }
 
@@ -70,17 +68,16 @@ public class BuildingController {
 
 
     // GET BUILDING BY ID
+
     @GetMapping("/{id}")
     public ResponseEntity<BuildingResponseDTO> getBuildingById(
             @PathVariable Long id
     ) {
 
 
-        BuildingResponseDTO building =
-                buildingService.getBuildingById(id);
-
-
-        return ResponseEntity.ok(building);
+        return ResponseEntity.ok(
+                buildingService.getBuildingById(id)
+        );
 
     }
 
@@ -89,6 +86,7 @@ public class BuildingController {
 
 
     // UPDATE BUILDING
+
     @PutMapping("/{id}")
     public ResponseEntity<BuildingResponseDTO> updateBuilding(
             @PathVariable Long id,
@@ -96,11 +94,9 @@ public class BuildingController {
     ) {
 
 
-        BuildingResponseDTO updatedBuilding =
-                buildingService.updateBuilding(id, dto);
-
-
-        return ResponseEntity.ok(updatedBuilding);
+        return ResponseEntity.ok(
+                buildingService.updateBuilding(id, dto)
+        );
 
     }
 
@@ -109,6 +105,7 @@ public class BuildingController {
 
 
     // DELETE BUILDING
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteBuilding(
             @PathVariable Long id

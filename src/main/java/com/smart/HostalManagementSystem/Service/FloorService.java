@@ -1,10 +1,12 @@
 package com.smart.HostalManagementSystem.Service;
 
 import com.smart.HostalManagementSystem.DTO.FloorDTO;
+import com.smart.HostalManagementSystem.Entity.Building;
 import com.smart.HostalManagementSystem.Entity.Floor;
-import com.smart.HostalManagementSystem.Entity.Hostel;
+import com.smart.HostalManagementSystem.Entity.Building;
+import com.smart.HostalManagementSystem.Repository.BuildingRepository;
 import com.smart.HostalManagementSystem.Repository.FloorRepository;
-import com.smart.HostalManagementSystem.Repository.HostelRepository;
+import com.smart.HostalManagementSystem.Repository.BuildingRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,31 +18,32 @@ public class FloorService {
 
 
     private final FloorRepository floorRepository;
-    private final HostelRepository hostelRepository;
+    private final BuildingRepository buildingRepository;
 
 
     public FloorService(
             FloorRepository floorRepository,
-            HostelRepository hostelRepository
+            BuildingRepository buildingRepository
     ){
         this.floorRepository = floorRepository;
-        this.hostelRepository = hostelRepository;
+        this.buildingRepository = buildingRepository;
     }
 
 
 
     public FloorDTO createFloor(FloorDTO dto){
 
-
-        Hostel hostel = hostelRepository.findById(dto.getHostelId())
-                .orElseThrow(() -> new RuntimeException("Hostel not found"));
-
+        Building building = buildingRepository
+                .findById(dto.getBuildingId())
+                .orElseThrow(() -> new RuntimeException("Building not found"));
 
         Floor floor = new Floor();
 
         floor.setFloorName(dto.getFloorName());
         floor.setFloorNumber(dto.getFloorNumber());
-        floor.setHostel(hostel);
+
+
+        floor.setBuilding(building);
 
 
         Floor savedFloor = floorRepository.save(floor);
@@ -105,7 +108,7 @@ public class FloorService {
         dto.setId(floor.getId());
         dto.setFloorName(floor.getFloorName());
         dto.setFloorNumber(floor.getFloorNumber());
-        dto.setHostelId(floor.getHostel().getId());
+        dto.setBuildingId(floor.getBuilding().getId());
 
         return dto;
     }
