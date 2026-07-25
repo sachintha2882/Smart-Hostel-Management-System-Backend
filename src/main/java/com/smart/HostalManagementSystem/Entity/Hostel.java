@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -42,6 +44,13 @@ public class Hostel extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.ACTIVE;
+
+    @OneToMany(
+            mappedBy = "hostel",
+            cascade =  CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Building> buildings = new ArrayList<>();
 
 
 }
