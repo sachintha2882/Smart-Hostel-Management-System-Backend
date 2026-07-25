@@ -1,10 +1,10 @@
 package com.smart.HostalManagementSystem.Entity;
 
+
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 
 @Entity
@@ -20,15 +20,25 @@ public class Building {
     private Long id;
 
 
-    private String BuildingName;
+    private String buildingName;
 
 
     private String description;
 
 
-    // Many buildings belong to one hostel
+
+    // One Hostel can have many Buildings
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hostel_id")
+    @JoinColumn(name = "hostel_id", nullable = false)
     private Hostel hostel;
+
+    @OneToMany(
+            mappedBy = "building",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Floor> floors;
+
+
 
 }
