@@ -81,6 +81,17 @@ public class BuildingController {
 
     }
 
+    // GET BUILDING DETAILS WITH FLOORS AND ROOMS
+    @GetMapping("/{id}/details")
+    public ResponseEntity<BuildingResponseDTO> getBuildingDetails(
+            @PathVariable Long id
+    ) {
+
+        BuildingResponseDTO details =
+                buildingService.getBuildingDetails(id);
+
+        return ResponseEntity.ok(details);
+    }
 
 
 
