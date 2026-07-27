@@ -20,4 +20,6 @@ public class StudentAllocationRequestDTO {
 
     private String status;
 
+    private String academicYear;
+
 }

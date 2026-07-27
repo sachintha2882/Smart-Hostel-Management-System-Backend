@@ -1,18 +1,21 @@
 package com.smart.HostalManagementSystem.Service;
 
 
+
 import com.smart.HostalManagementSystem.DTO.BuildingRequestDTO;
 import com.smart.HostalManagementSystem.DTO.BuildingResponseDTO;
 import com.smart.HostalManagementSystem.Entity.*;
 import com.smart.HostalManagementSystem.Repository.*;
+import com.smart.HostalManagementSystem.DTO.FloorResponseDTO;
+import com.smart.HostalManagementSystem.DTO.RoomResponseDTO;
+
+import  java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -225,6 +228,114 @@ public class BuildingService {
 
 
         buildingRepository.delete(building);
+
+    }
+
+    public BuildingResponseDTO getBuildingDetails(Long id) {
+
+
+        Building building = buildingRepository.findById(id)
+                .orElseThrow(
+                        () -> new RuntimeException("Building not found")
+                );
+
+
+        BuildingResponseDTO response =
+                new BuildingResponseDTO();
+
+
+        response.setId(
+                building.getId()
+        );
+
+
+        response.setBuildingName(
+                building.getBuildingName()
+        );
+
+
+        response.setDescription(
+                building.getDescription()
+        );
+
+
+
+        response.setFloors(
+
+                building.getFloors()
+                        .stream()
+                        .map(floor -> {
+
+
+                            FloorResponseDTO floorDTO =
+                                    new FloorResponseDTO();
+
+
+                            floorDTO.setId(
+                                    floor.getId()
+                            );
+
+
+                            floorDTO.setFloorName(
+                                    floor.getFloorName()
+                            );
+
+
+                            floorDTO.setFloorNumber(
+                                    floor.getFloorNumber()
+                            );
+
+
+                            floorDTO.setRooms(
+
+                                    floor.getRooms()
+                                            .stream()
+                                            .map(room -> {
+
+
+                                                RoomResponseDTO roomDTO =
+                                                        new RoomResponseDTO();
+
+
+                                                roomDTO.setId(
+                                                        room.getId()
+                                                );
+
+
+                                                roomDTO.setRoomNumber(
+                                                        room.getRoomNumber()
+                                                );
+
+
+                                                roomDTO.setCapacity(
+                                                        room.getCapacity()
+                                                );
+
+
+                                                roomDTO.setCurrentOccupancy(
+                                                        room.getCurrentOccupancy()
+                                                );
+
+
+                                                return roomDTO;
+
+
+                                            })
+                                            .collect(Collectors.toList())
+
+                            );
+
+
+                            return floorDTO;
+
+
+                        })
+                        .collect(Collectors.toList())
+
+        );
+
+
+        return response;
 
     }
 

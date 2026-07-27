@@ -38,4 +38,6 @@ public class StudentAllocationResponseDTO {
 
     private String status;
 
+    private String academicYear;
+
 }

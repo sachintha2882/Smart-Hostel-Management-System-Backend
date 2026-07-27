@@ -5,6 +5,8 @@ import com.smart.HostalManagementSystem.DTO.StudentAllocationRequestDTO;
 import com.smart.HostalManagementSystem.DTO.StudentAllocationResponseDTO;
 import com.smart.HostalManagementSystem.Service.StudentAllocationService;
 import org.springframework.web.bind.annotation.*;
+import com.smart.HostalManagementSystem.DTO.BulkAllocationResultDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -36,6 +38,15 @@ public class StudentAllocationController {
 
         return allocationService.createAllocation(dto);
 
+    }
+
+    @PostMapping("/bulk-upload")
+    public BulkAllocationResultDTO bulkUpload(
+            @RequestParam("file")  MultipartFile file,
+            @RequestParam("floorId") Long floorId,
+            @RequestParam("academicYear") String academicYear
+    ) throws Exception {
+        return allocationService.bulkAllocateFromExcel(file, floorId, academicYear);
     }
 
 

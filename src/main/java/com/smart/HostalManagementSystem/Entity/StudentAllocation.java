@@ -29,6 +29,8 @@ public class StudentAllocation {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
+    @Column(nullable = false)
+    private String AcedemicYear;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,7 +42,7 @@ public class StudentAllocation {
     @Column(nullable = false)
     private LocalDate allocatedDate;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate releasedDate;
 
 
