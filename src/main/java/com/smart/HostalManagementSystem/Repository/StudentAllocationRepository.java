@@ -21,6 +21,10 @@ public interface StudentAllocationRepository extends JpaRepository<StudentAlloca
     List<StudentAllocation> findByRoomId(Long roomId);
 
 
+    List<StudentAllocation> findByStatus(String status);
+
+
+
 
     // Check whether a student already has an active allocation
     boolean existsByStudentIdAndStatus(Long studentId, String status);

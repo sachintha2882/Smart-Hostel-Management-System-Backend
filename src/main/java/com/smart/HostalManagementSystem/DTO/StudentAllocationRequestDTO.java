@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 
 @Getter
 @Setter
@@ -21,5 +23,7 @@ public class StudentAllocationRequestDTO {
     private String status;
 
     private String academicYear;
+
+    private LocalDate expectedReleaseDate;
 
 }

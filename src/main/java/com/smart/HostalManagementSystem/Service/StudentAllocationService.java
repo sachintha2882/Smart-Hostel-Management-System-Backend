@@ -13,6 +13,7 @@ import com.smart.HostalManagementSystem.Enums.Role;
 import com.smart.HostalManagementSystem.Repository.RoomRepository;
 import com.smart.HostalManagementSystem.Repository.StudentAllocationRepository;
 import com.smart.HostalManagementSystem.Repository.StudentRepository;
+import  com.smart.HostalManagementSystem.Service.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +43,8 @@ public class StudentAllocationService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final EmailService emailService;
+
 
 
     public StudentAllocationService(
@@ -50,7 +53,8 @@ public class StudentAllocationService {
             RoomRepository roomRepository,
             ExcelParserService excelParserService,
             UserService userService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
 
         this.allocationRepository = allocationRepository;
         this.studentRepository = studentRepository;
@@ -58,6 +62,7 @@ public class StudentAllocationService {
         this.excelParserService = excelParserService;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.emailService =  emailService;
     }
 
 
@@ -124,6 +129,9 @@ public class StudentAllocationService {
         allocation.setStatus("ACTIVE");
 
         allocation.setAcedemicYear(dto.getAcademicYear());
+
+        allocation.setExpectedReleaseDate(parsedExpectedReleaseDate);
+
 
 
         StudentAllocation saved =
@@ -270,9 +278,11 @@ public class StudentAllocationService {
     }
 
     public BulkAllocationResultDTO bulkAllocateFromExcel(
-            MultipartFile file, Long floorId, String academicYear) throws Exception {
+            MultipartFile file, Long floorId, String academicYear,String expectedReleaseDate) throws Exception {
 
         BulkAllocationResultDTO result = new BulkAllocationResultDTO();
+
+        LocalDate parsedExpectedReleaseDate = LocalDate.parse(expectedReleaseDate);
 
         // 1. Excel eken students list eka parse karanawa
         List<Student> parsedStudents = excelParserService.parseStudentExcel(file);
@@ -321,6 +331,8 @@ public class StudentAllocationService {
                 allocation.setAllocatedDate(LocalDate.now());
                 allocation.setStatus("ACTIVE");
                 allocation.setAcedemicYear(academicYear);
+                allocation.setExpectedReleaseDate(parsedExpectedReleaseDate);
+
                 allocationRepository.save(allocation);
 
                 // 7. Room occupancy update karanawa (in-memory list ekath update karanna one,
@@ -346,6 +358,19 @@ public class StudentAllocationService {
                     user.setForcePasswordChange(true);
                     user.setFirstLogin(true);
                     userService.saveUser(user);
+
+                    try{
+                        emailService.sendCredentialsEmail(
+                                student.getEmail(),
+                                student.getFullName(),
+                                username,
+                                tempPassword,
+                                availableRoom.getRoomNumber()
+                        );
+                    } catch (Exception emailError){
+
+                        System.out.println("Email sending failed" + student.getEmail());
+                    }
                 }
 
                 // 9. Result eke success record eka add karanawa
@@ -436,6 +461,10 @@ public class StudentAllocationService {
 
         dto.setAcademicYear(
                 allocation.getAcedemicYear());
+
+        dto.setExpectedReleaseDate(
+                allocation.getExpectedReleaseDate()
+        );
 
 
         return dto;

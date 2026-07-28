@@ -50,4 +50,6 @@ public class StudentAllocation {
     @Column(nullable = false)
     private String status;   // ACTIVE / INACTIVE
 
+    @Column(nullable = false)
+    private LocalDate expectedReleaseDate;
 }

@@ -40,4 +40,6 @@ public class StudentAllocationResponseDTO {
 
     private String academicYear;
 
+    private LocalDate expectedReleaseDate;
+
 }
