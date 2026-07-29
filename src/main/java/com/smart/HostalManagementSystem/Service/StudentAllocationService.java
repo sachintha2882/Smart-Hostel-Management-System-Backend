@@ -130,7 +130,7 @@ public class StudentAllocationService {
 
         allocation.setAcedemicYear(dto.getAcademicYear());
 
-        allocation.setExpectedReleaseDate(parsedExpectedReleaseDate);
+        allocation.setExpectedReleaseDate(dto.getExpectedReleaseDate());
 
 
 
@@ -200,6 +200,47 @@ public class StudentAllocationService {
 
         return convertToDTO(updated);
     }
+
+    //STatus eka active da nedda kiyala balana mthode eka
+    // Update Allocation Status (ACTIVE <-> INACTIVE)
+    public StudentAllocationResponseDTO updateStatus(
+            Long id,
+            String status
+    ) {
+
+        StudentAllocation allocation =
+                allocationRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Allocation not found"));
+
+
+        allocation.setStatus(status);
+
+
+        if(status.equals("INACTIVE")) {
+
+            allocation.setReleasedDate(
+                    LocalDate.now()
+            );
+
+        } else if(status.equals("ACTIVE")) {
+
+            allocation.setReleasedDate(null);
+
+        }
+
+
+        StudentAllocation updated =
+                allocationRepository.save(allocation);
+
+
+        return convertToDTO(updated);
+    }
+
+
+
+
 
     // Get All Allocations
     public List<StudentAllocationResponseDTO> getAllAllocations(){

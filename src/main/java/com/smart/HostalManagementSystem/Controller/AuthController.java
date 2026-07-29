@@ -1,6 +1,7 @@
 package com.smart.HostalManagementSystem.Controller;
 
 
+import com.smart.HostalManagementSystem.DTO.ChangePasswordRequestDTO;
 import com.smart.HostalManagementSystem.DTO.LoginRequestDTO;
 import com.smart.HostalManagementSystem.DTO.LoginResponseDTO;
 import com.smart.HostalManagementSystem.DTO.RegisterRequestDTO;
@@ -125,11 +126,31 @@ public class AuthController {
 
                 user.getUsername(),
 
-                user.getRole().name()
+                user.getRole().name(),
+
+                user.isForcePasswordChange()
 
         );
 
 
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordRequestDTO requst
+    ){
+        User user = userRepository.findByUsername(requst.getUsername())
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        if(!passwordEncoder.matches(requst.getCurrentPassword(), user.getPassword())){
+            return ResponseEntity.badRequest().body("Current Password is Incorect");
+        }
+
+        user.setPassword(passwordEncoder.encode(requst.getNewPassword()));
+        user.setForcePasswordChange(false);
+        user.setFirstLogin(false);
+
+        userRepository.save(user);
+        return ResponseEntity.ok("Password Changed Successfully");
     }
 
 
