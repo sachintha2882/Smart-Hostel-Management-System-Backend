@@ -44,7 +44,7 @@ public class User {
     private boolean firstLogin = true;
 
     @Column(name = "force_password_change")
-    private Boolean forcePasswordChange = true;
+    private boolean forcePasswordChange = true;
 
     // Link with Student
     @OneToOne(fetch = FetchType.LAZY)

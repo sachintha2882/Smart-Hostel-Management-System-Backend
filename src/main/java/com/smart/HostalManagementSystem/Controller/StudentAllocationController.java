@@ -4,6 +4,8 @@ package com.smart.HostalManagementSystem.Controller;
 import com.smart.HostalManagementSystem.DTO.StudentAllocationRequestDTO;
 import com.smart.HostalManagementSystem.DTO.StudentAllocationResponseDTO;
 import com.smart.HostalManagementSystem.Service.StudentAllocationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.smart.HostalManagementSystem.DTO.BulkAllocationResultDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,15 +44,39 @@ public class StudentAllocationController {
     }
 
     @PostMapping("/bulk-upload")
-    public BulkAllocationResultDTO bulkUpload(
-            @RequestParam("file")  MultipartFile file,
+    public ResponseEntity<?> bulkUpload(
+            @RequestParam("file") MultipartFile file,
             @RequestParam("floorId") Long floorId,
             @RequestParam("academicYear") String academicYear,
             @RequestParam("expectedReleaseDate") String expectedReleaseDate
-    ) throws Exception {
-        return allocationService.bulkAllocateFromExcel(file, floorId, academicYear, expectedReleaseDate);
-    }
+    ) {
 
+        try {
+
+            BulkAllocationResultDTO result =
+                    allocationService.bulkAllocateFromExcel(
+                            file,
+                            floorId,
+                            academicYear,
+                            expectedReleaseDate
+                    );
+
+            return ResponseEntity.ok(result);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+
+        } catch (Exception e) {
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Something went wrong during upload");
+
+        }
+    }
 
 
 
@@ -116,6 +142,19 @@ public class StudentAllocationController {
         return allocationService.releaseAllocation(id);
 
     }
+
+    @PutMapping("/status/{id}")
+    public ResponseEntity<?> updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status
+    ) {
+
+        allocationService.updateStatus(id, status);
+
+        return ResponseEntity.ok("Status updated successfully");
+    }
+
+
 
 
     // Delete Allocation
