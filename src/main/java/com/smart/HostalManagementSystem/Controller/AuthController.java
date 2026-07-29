@@ -128,7 +128,9 @@ public class AuthController {
 
                 user.getRole().name(),
 
-                user.isForcePasswordChange()
+                user.isForcePasswordChange(),
+
+                user.getStudent().getFullName()
 
         );
 
