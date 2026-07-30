@@ -3,12 +3,14 @@ package com.smart.HostalManagementSystem.Controller;
 
 import com.smart.HostalManagementSystem.DTO.StudentAllocationRequestDTO;
 import com.smart.HostalManagementSystem.DTO.StudentAllocationResponseDTO;
+import com.smart.HostalManagementSystem.DTO.MyRoomDetailsDTO;
 import com.smart.HostalManagementSystem.Service.StudentAllocationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.smart.HostalManagementSystem.DTO.BulkAllocationResultDTO;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.Authentication;
 import java.time.LocalDate;
 
 import java.util.List;
@@ -78,7 +80,12 @@ public class StudentAllocationController {
         }
     }
 
+    @GetMapping("/my-room")
+    public MyRoomDetailsDTO getMyRoomDetails(Authentication authentication) {
+        String username = authentication.getName();
+        return allocationService.getMyRoomDetails(username);
 
+    }
 
 
     // Get All Allocations

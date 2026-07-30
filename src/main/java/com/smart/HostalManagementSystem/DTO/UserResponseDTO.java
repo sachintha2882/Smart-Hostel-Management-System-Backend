@@ -1,28 +1,21 @@
 package com.smart.HostalManagementSystem.DTO;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class LoginResponseDTO {
+@AllArgsConstructor
+public class UserResponseDTO {
 
-
-    private String token;
-
+    private Long id;
     private String username;
-
     private String role;
-
-    private boolean forcePasswordChange;
-
-    private  String fullName;
-
+    private boolean enabled;
+    private boolean firstLogin;
+    private String studentName;   // student role ekakata nam pamanak
 
 }

@@ -6,6 +6,7 @@ import com.smart.HostalManagementSystem.DTO.LoginRequestDTO;
 import com.smart.HostalManagementSystem.DTO.LoginResponseDTO;
 import com.smart.HostalManagementSystem.DTO.RegisterRequestDTO;
 import com.smart.HostalManagementSystem.Entity.User;
+import com.smart.HostalManagementSystem.Enums.Role;
 import com.smart.HostalManagementSystem.Repository.UserRepository;
 import com.smart.HostalManagementSystem.Service.JwtService;
 import com.smart.HostalManagementSystem.Service.UserService;
@@ -118,6 +119,14 @@ public class AuthController {
                         user.getUsername()
                 );
 
+        String displayName;
+
+        if (user.getRole() == Role.STUDENT){
+            displayName = user.getStudent().getFullName();
+        }else{
+            displayName = user.getUsername()
+            ;                }
+
 
 
         return new LoginResponseDTO(
@@ -128,7 +137,11 @@ public class AuthController {
 
                 user.getRole().name(),
 
-                user.isForcePasswordChange()
+                user.isForcePasswordChange(),
+
+                user.getFullName()
+
+
 
         );
 

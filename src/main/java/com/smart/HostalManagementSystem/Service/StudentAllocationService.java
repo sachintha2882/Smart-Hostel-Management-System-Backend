@@ -5,6 +5,9 @@ import com.smart.HostalManagementSystem.DTO.BulkAllocationResultDTO;
 import com.smart.HostalManagementSystem.DTO.StudentAllocationRequestDTO;
 import com.smart.HostalManagementSystem.DTO.StudentAllocationResponseDTO;
 import com.smart.HostalManagementSystem.DTO.StudentCredentialDTO;
+import com.smart.HostalManagementSystem.DTO.MyRoomDetailsDTO;
+import com.smart.HostalManagementSystem.Entity.Floor;
+import com.smart.HostalManagementSystem.Entity.Building;
 import com.smart.HostalManagementSystem.Entity.Room;
 import com.smart.HostalManagementSystem.Entity.Student;
 import com.smart.HostalManagementSystem.Entity.StudentAllocation;
@@ -13,6 +16,7 @@ import com.smart.HostalManagementSystem.Enums.Role;
 import com.smart.HostalManagementSystem.Repository.RoomRepository;
 import com.smart.HostalManagementSystem.Repository.StudentAllocationRepository;
 import com.smart.HostalManagementSystem.Repository.StudentRepository;
+import com.smart.HostalManagementSystem.Repository.UserRepository;
 import  com.smart.HostalManagementSystem.Service.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -45,6 +49,8 @@ public class StudentAllocationService {
 
     private final EmailService emailService;
 
+    private final UserRepository userRepository;
+
 
 
     public StudentAllocationService(
@@ -54,7 +60,8 @@ public class StudentAllocationService {
             ExcelParserService excelParserService,
             UserService userService,
             PasswordEncoder passwordEncoder,
-            EmailService emailService) {
+            EmailService emailService,
+            UserRepository userRepository) {
 
         this.allocationRepository = allocationRepository;
         this.studentRepository = studentRepository;
@@ -63,6 +70,7 @@ public class StudentAllocationService {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.emailService =  emailService;
+        this.userRepository = userRepository;
     }
 
 
@@ -316,6 +324,65 @@ public class StudentAllocationService {
 
         allocationRepository.deleteById(id);
 
+    }
+
+    // ==========================================
+// GET MY ROOM DETAILS (Student's own allocation)
+// ==========================================
+    public MyRoomDetailsDTO getMyRoomDetails(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Student student = user.getStudent();
+
+        if (student == null) {
+            throw new RuntimeException("No student profile linked to this account");
+        }
+
+        // Active allocation eka hoyanawa
+        List<StudentAllocation> allocations =
+                allocationRepository.findByStudentId(student.getId());
+
+        StudentAllocation activeAllocation = allocations.stream()
+                .filter(a -> "ACTIVE".equals(a.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No active room allocation found"));
+
+        Room room = activeAllocation.getRoom();
+        Floor floor = room.getFloor();
+        Building building = floor.getBuilding();
+
+        // Roommates - same room, ACTIVE students, current student ain karala
+        List<String> roommates = allocationRepository.findByRoomId(room.getId())
+                .stream()
+                .filter(a -> "ACTIVE".equals(a.getStatus()))
+                .filter(a -> !a.getStudent().getId().equals(student.getId()))
+                .map(a -> a.getStudent().getFullName())
+                .collect(Collectors.toList());
+
+        MyRoomDetailsDTO dto = new MyRoomDetailsDTO();
+        dto.setFullName(student.getFullName());
+        dto.setRegistrationNumber(student.getRegistrationNumber());
+        dto.setEmail(student.getEmail());
+        dto.setPhoneNumber(student.getPhoneNumber());
+        dto.setFaculty(student.getFaculty());
+
+        dto.setHostelName(building.getHostel().getHostelName());
+        dto.setBuildingName(building.getBuildingName());
+        dto.setFloorName(floor.getFloorName());
+        dto.setRoomNumber(room.getRoomNumber());
+        dto.setRoomCapacity(room.getCapacity());
+        dto.setCurrentOccupancy(room.getCurrentOccupancy());
+
+        dto.setAllocatedDate(activeAllocation.getAllocatedDate());
+        dto.setExpectedReleaseDate(activeAllocation.getExpectedReleaseDate());
+        dto.setAcademicYear(activeAllocation.getAcedemicYear());
+        dto.setStatus(activeAllocation.getStatus());
+
+        dto.setRoommateNames(roommates);
+
+        return dto;
     }
 
     public BulkAllocationResultDTO bulkAllocateFromExcel(
