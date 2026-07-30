@@ -43,12 +43,14 @@ public class User {
     @Column(nullable = false)
     private boolean firstLogin = true;
 
-    @Column(name = "force_password_change")
+    @Column(name = "force_password_change", nullable = false)
     private boolean forcePasswordChange = true;
 
     // Link with Student
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", unique = true)
     private Student student;
+
+    private String fullName;
 
 }
