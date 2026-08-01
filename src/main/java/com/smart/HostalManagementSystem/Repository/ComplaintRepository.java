@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Collection;
 
 @Repository
 public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
@@ -16,4 +17,6 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByRoomId(Long roomId);
 
     List<Complaint> findByCategory(String category);
+
+    List<Complaint> findByStatusIn(Collection<String> statuses);
 }
