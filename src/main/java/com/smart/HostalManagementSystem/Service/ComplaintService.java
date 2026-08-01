@@ -10,6 +10,7 @@ import com.smart.HostalManagementSystem.Repository.RoomRepository;
 import com.smart.HostalManagementSystem.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,14 +117,41 @@ public class ComplaintService {
 
     // Resolve Complaint
     public ComplaintResponseDTO resolveComplaint(Long id) {
+        return completeComplaint(id, "Marked as resolved.");
+    }
+
+    // Complete a forwarded complaint (Maintenance action)
+    public ComplaintResponseDTO completeComplaint(Long id, String maintenanceRemarks) {
 
         Complaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
+        if (!"FORWARDED".equalsIgnoreCase(complaint.getStatus())) {
+            throw new IllegalStateException("Only forwarded complaints can be completed by maintenance");
+        }
+
         complaint.setStatus("RESOLVED");
+        complaint.setMaintenanceRemarks(maintenanceRemarks);
+        complaint.setCompletedAt(LocalDateTime.now());
 
         Complaint updated = complaintRepository.save(complaint);
         return convertToResponseDTO(updated);
+    }
+
+    // Work queue visible to the maintenance team
+    public List<ComplaintResponseDTO> getMaintenanceQueue() {
+        return complaintRepository.findByStatusIn(List.of("FORWARDED", "IN_PROGRESS"))
+                .stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Completed jobs, shown in maintenance history
+    public List<ComplaintResponseDTO> getMaintenanceHistory() {
+        return complaintRepository.findByStatus("RESOLVED")
+                .stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 
 
@@ -142,11 +170,15 @@ public class ComplaintService {
         dto.setCategory(complaint.getCategory());
         dto.setStatus(complaint.getStatus());
         dto.setSubWardenRemarks(complaint.getSubWardenRemarks());
+        dto.setMaintenanceRemarks(complaint.getMaintenanceRemarks());
+        dto.setCompletedAt(complaint.getCompletedAt());
         dto.setStudentId(complaint.getStudent().getId());
         dto.setStudentName(complaint.getStudent().getFullName());
         dto.setStudentIndexNumber(complaint.getStudent().getRegistrationNumber());
         dto.setRoomId(complaint.getRoom().getId());
         dto.setRoomNumber(complaint.getRoom().getRoomNumber());
+        dto.setHostelId(complaint.getRoom().getFloor().getBuilding().getHostel().getId());
+        dto.setHostelName(complaint.getRoom().getFloor().getBuilding().getHostel().getHostelName());
         dto.setCreatedAt(complaint.getCreatedAt());
         dto.setUpdatedAt(complaint.getUpdatedAt());
 

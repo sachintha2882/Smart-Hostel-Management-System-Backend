@@ -6,6 +6,8 @@ public enum Role {
     STUDENT_AFFAIRS,
     WARDEN,
     SUBWARDEN,
+    MAINTENANCE,
+    CANTEEN,
     STUDENT
 
 

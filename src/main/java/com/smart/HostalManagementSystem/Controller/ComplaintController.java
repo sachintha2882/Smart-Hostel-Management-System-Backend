@@ -2,6 +2,7 @@ package com.smart.HostalManagementSystem.Controller;
 
 import com.smart.HostalManagementSystem.DTO.ComplaintRequestDTO;
 import com.smart.HostalManagementSystem.DTO.ComplaintResponseDTO;
+import com.smart.HostalManagementSystem.DTO.MaintenanceCompletionRequestDTO;
 import com.smart.HostalManagementSystem.Service.ComplaintService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,6 +83,23 @@ public class ComplaintController {
     public ComplaintResponseDTO resolveComplaint(
             @PathVariable Long id) {
         return complaintService.resolveComplaint(id);
+    }
+
+    @GetMapping("/maintenance/queue")
+    public List<ComplaintResponseDTO> getMaintenanceQueue() {
+        return complaintService.getMaintenanceQueue();
+    }
+
+    @GetMapping("/maintenance/history")
+    public List<ComplaintResponseDTO> getMaintenanceHistory() {
+        return complaintService.getMaintenanceHistory();
+    }
+
+    @PutMapping("/{id}/complete")
+    public ComplaintResponseDTO completeComplaint(
+            @PathVariable Long id,
+            @jakarta.validation.Valid @RequestBody MaintenanceCompletionRequestDTO dto) {
+        return complaintService.completeComplaint(id, dto.getRemarks());
     }
 
 

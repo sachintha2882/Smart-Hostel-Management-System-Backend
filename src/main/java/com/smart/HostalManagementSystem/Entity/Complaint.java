@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "complaints")
 @Getter
@@ -32,6 +34,11 @@ public class Complaint extends BaseEntity {
 
     @Column
     private String subWardenRemarks;
+
+    @Column(columnDefinition = "TEXT")
+    private String maintenanceRemarks;
+
+    private LocalDateTime completedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
