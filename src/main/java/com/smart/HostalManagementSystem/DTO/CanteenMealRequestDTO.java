@@ -9,4 +9,5 @@ public class CanteenMealRequestDTO {
     private String mainDishes;
     private String curries;
     private String shortEats;
+    private Long hostelId;
 }

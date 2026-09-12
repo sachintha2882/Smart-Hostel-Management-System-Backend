@@ -58,28 +58,26 @@ public class SecurityConfig {
                         // ===== NEW: preflight OPTIONS requests okkoma permit karanawa =====
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
-
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/students/**").permitAll()
-                        .requestMatchers("/api/floors/**").permitAll()
-                        .requestMatchers("/api/hostels/**").permitAll()
-                        .requestMatchers("/api/rooms/**").permitAll()
-                        .requestMatchers("/api/allocations/**").permitAll()
-                        .requestMatchers("/api/buildings/**").permitAll()
-                        .requestMatchers("api/users/**").permitAll()
-                        .requestMatchers("/api/inventory/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
+
+                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "STUDENT_AFFAIRS")
+
                         .requestMatchers(HttpMethod.GET, "/api/canteen-meals/**").hasAnyRole("STUDENT", "CANTEEN", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/canteen-meals/**").hasRole("CANTEEN")
-                        .requestMatchers(HttpMethod.PUT, "/api/canteen-meals/**").hasRole("CANTEEN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/canteen-meals/**").hasRole("CANTEEN")
-                        .requestMatchers(HttpMethod.GET, "/api/complaints/**").hasAnyRole("ADMIN", "STUDENT", "STUDENT_AFFAIRS", "SUBWARDEN", "SUB_WARDEN", "MAINTENANCE")
+                        .requestMatchers(HttpMethod.POST, "/api/canteen-meals/**").hasAnyRole("CANTEEN", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/canteen-meals/**").hasAnyRole("CANTEEN", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/canteen-meals/**").hasAnyRole("CANTEEN", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/complaints/my-complaints").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/complaints/subwarden").hasAnyRole("SUBWARDEN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/complaints/**").hasAnyRole("ADMIN", "STUDENT", "STUDENT_AFFAIRS", "SUBWARDEN", "MAINTENANCE")
                         .requestMatchers(HttpMethod.POST, "/api/complaints").hasRole("STUDENT")
-                        .requestMatchers(HttpMethod.PUT, "/api/complaints/*/forward", "/api/complaints/*/decline").hasAnyRole("SUBWARDEN", "SUB_WARDEN")
-                        .requestMatchers(HttpMethod.PUT, "/api/complaints/*/complete", "/api/complaints/*/resolve").hasRole("MAINTENANCE")
+                        .requestMatchers(HttpMethod.PUT, "/api/complaints/*/forward", "/api/complaints/*/decline").hasAnyRole("SUBWARDEN", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/complaints/*/start", "/api/complaints/*/complete", "/api/complaints/*/resolve").hasAnyRole("MAINTENANCE", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/complaints/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
-
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,

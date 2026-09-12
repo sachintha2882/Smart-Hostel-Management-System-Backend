@@ -35,4 +35,8 @@ public class CanteenMeal extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hostel_id")
+    private Hostel hostel;
 }

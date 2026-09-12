@@ -121,11 +121,11 @@ public class AuthController {
 
         String displayName;
 
-        if (user.getRole() == Role.STUDENT){
+        if (user.getRole() == Role.STUDENT && user.getStudent() != null){
             displayName = user.getStudent().getFullName();
         }else{
-            displayName = user.getUsername()
-            ;                }
+            displayName = user.getUsername();
+        }
 
 
 
