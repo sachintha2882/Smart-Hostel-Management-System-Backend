@@ -12,6 +12,8 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
     List<Complaint> findByStudentId(Long studentId);
 
+    List<Complaint> findByStudentIdOrderByCreatedAtDesc(Long studentId);
+
     List<Complaint> findByStatus(String status);
 
     List<Complaint> findByRoomId(Long roomId);
@@ -19,4 +21,10 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByCategory(String category);
 
     List<Complaint> findByStatusIn(Collection<String> statuses);
+
+    List<Complaint> findByRoomFloorBuildingHostelIdAndStatusIn(Long hostelId, Collection<String> statuses);
+
+    List<Complaint> findByRoomFloorBuildingHostelIdAndStatus(Long hostelId, String status);
+
+    List<Complaint> findByRoomFloorBuildingHostelIdOrderByCreatedAtDesc(Long hostelId);
 }

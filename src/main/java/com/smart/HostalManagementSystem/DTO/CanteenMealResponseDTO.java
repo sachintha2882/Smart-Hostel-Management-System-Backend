@@ -14,4 +14,6 @@ public class CanteenMealResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime expiresAt;
+    private Long hostelId;
+    private String hostelName;
 }

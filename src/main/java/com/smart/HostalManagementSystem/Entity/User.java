@@ -51,6 +51,10 @@ public class User {
     @JoinColumn(name = "student_id", unique = true)
     private Student student;
 
-    private String fullName;
+    // Link with Hostel (For staff: MAINTENANCE, CANTEEN, SUBWARDEN, WARDEN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hostel_id")
+    private Hostel hostel;
 
+    private String fullName;
 }
