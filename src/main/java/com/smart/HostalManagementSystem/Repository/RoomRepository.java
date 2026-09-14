@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
+    List<Room> findByFloorIdOrderByRoomNumberAsc(Long floorId);
+
     List<Room> findByFloorId(Long floorId);
 
     boolean existsByRoomNumberAndFloorId(String roomNumber, Long floorId);

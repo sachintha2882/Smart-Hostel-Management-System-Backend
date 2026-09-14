@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface CanteenMealRepository extends JpaRepository<CanteenMeal, Long> {
     List<CanteenMeal> findAllByExpiresAtAfterOrderByUpdatedAtDesc(LocalDateTime now);
+    List<CanteenMeal> findByHostelIdAndExpiresAtAfterOrderByUpdatedAtDesc(Long hostelId, LocalDateTime now);
     void deleteByMealTypeAndExpiresAtAfter(String mealType, LocalDateTime now);
+    void deleteByHostelIdAndMealTypeAndExpiresAtAfter(Long hostelId, String mealType, LocalDateTime now);
     long deleteByExpiresAtBefore(LocalDateTime now);
 }

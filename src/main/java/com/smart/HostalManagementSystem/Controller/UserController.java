@@ -2,10 +2,13 @@ package com.smart.HostalManagementSystem.Controller;
 
 import com.smart.HostalManagementSystem.DTO.RegisterRequestDTO;
 import com.smart.HostalManagementSystem.DTO.UserResponseDTO;
+import com.smart.HostalManagementSystem.Entity.Hostel;
 import com.smart.HostalManagementSystem.Entity.User;
+import com.smart.HostalManagementSystem.Repository.HostelRepository;
 import com.smart.HostalManagementSystem.Repository.UserRepository;
-import com.smart.HostalManagementSystem.Service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,16 +20,17 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final HostelRepository hostelRepository;
 
-    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder, HostelRepository hostelRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.hostelRepository = hostelRepository;
     }
 
     // Get all users (admin panel eke list eka)
     @GetMapping
     public List<UserResponseDTO> getAllUsers() {
-        System.out.println("========== GET ALL USERS ==========");
         return userRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
@@ -44,18 +48,35 @@ public class UserController {
     // Create user (admin eken manual widiyata user create karanawa)
     @PostMapping
     public UserResponseDTO createUser(@RequestBody RegisterRequestDTO request) {
+        String username = request.getUsername() == null ? "" : request.getUsername().trim();
 
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+        if (username.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
+        }
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 6 characters");
+        }
+        if (request.getRole() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role is required");
+        }
+
+        if (userRepository.existsByUsername(username)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
 
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(username);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
         user.setEnabled(true);
         user.setFirstLogin(true);
         user.setForcePasswordChange(true);
+
+        if (request.getHostelId() != null) {
+            Hostel hostel = hostelRepository.findById(request.getHostelId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hostel not found"));
+            user.setHostel(hostel);
+        }
 
         User saved = userRepository.save(user);
         return convertToDTO(saved);
@@ -71,7 +92,6 @@ public class UserController {
         User updated = userRepository.save(user);
         return convertToDTO(updated);
     }
-
 
     // Delete user
     @DeleteMapping("/{id}")
@@ -89,6 +109,10 @@ public class UserController {
         dto.setEnabled(user.isEnabled());
         dto.setFirstLogin(user.isFirstLogin());
         dto.setStudentName(user.getStudent() != null ? user.getStudent().getFullName() : null);
+        if (user.getHostel() != null) {
+            dto.setHostelId(user.getHostel().getId());
+            dto.setHostelName(user.getHostel().getHostelName());
+        }
         return dto;
     }
 }

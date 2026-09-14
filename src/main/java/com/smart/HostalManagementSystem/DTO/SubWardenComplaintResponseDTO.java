@@ -7,11 +7,17 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Response DTO for Sub Warden complaint views.
+ * Intentionally does NOT include any student personal information
+ * (no studentName, no studentIndexNumber, no studentId).
+ * Only location info (hostel, room) and complaint details are exposed.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ComplaintResponseDTO {
+public class SubWardenComplaintResponseDTO {
 
     private Long id;
     private String title;
@@ -22,13 +28,14 @@ public class ComplaintResponseDTO {
     private String maintenanceRemarks;
     private String photoUrl;
     private LocalDateTime completedAt;
-    private Long studentId;
-    private String studentName;
-    private String studentIndexNumber;
+
+    // Location info — no student PII
     private Long roomId;
     private String roomNumber;
+    private String buildingName;
     private Long hostelId;
     private String hostelName;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -12,6 +12,5 @@ public class RegisterRequestDTO {
 
     private Role role;
 
-
-
+    private Long hostelId;
 }

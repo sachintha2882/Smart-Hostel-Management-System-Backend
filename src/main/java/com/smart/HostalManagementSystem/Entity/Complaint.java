@@ -38,6 +38,9 @@ public class Complaint extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String maintenanceRemarks;
 
+    @Column(columnDefinition = "TEXT")
+    private String photoUrl;
+
     private LocalDateTime completedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

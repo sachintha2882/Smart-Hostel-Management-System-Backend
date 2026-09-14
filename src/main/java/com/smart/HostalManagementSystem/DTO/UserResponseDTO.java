@@ -17,5 +17,6 @@ public class UserResponseDTO {
     private boolean enabled;
     private boolean firstLogin;
     private String studentName;   // student role ekakata nam pamanak
-
+    private Long hostelId;
+    private String hostelName;
 }
