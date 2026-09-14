@@ -73,21 +73,44 @@ public class AnnouncementController {
     @PutMapping("/{id}")
     public ResponseEntity<AnnouncementResponseDTO> updateAnnouncement(
             @PathVariable Long id,
-            @RequestBody AnnouncementRequestDTO request
+            @RequestBody AnnouncementRequestDTO request,
+            Authentication authentication
     ) {
 
+        String username = authentication.getName();
+
+        String role = authentication.getAuthorities()
+                .stream()
+                .findFirst()
+                .map(authority -> authority.getAuthority())
+                .orElse("");
+
         AnnouncementResponseDTO response =
-                announcementService.updateAnnouncement(id, request);
+                announcementService.updateAnnouncement(
+                        id,
+                        request,
+                        username,
+                        role
+                );
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAnnouncement(
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
 
-        announcementService.deleteAnnouncement(id);
+        String username = authentication.getName();
+
+        String role = authentication.getAuthorities()
+                .stream()
+                .findFirst()
+                .map(authority -> authority.getAuthority())
+                .orElse("");
+
+        announcementService.deleteAnnouncement(id, username, role);
 
         return ResponseEntity.noContent().build();
     }

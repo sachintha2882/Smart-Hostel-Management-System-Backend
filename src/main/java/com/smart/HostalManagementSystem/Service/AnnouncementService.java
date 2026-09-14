@@ -31,6 +31,12 @@ public class AnnouncementService {
         announcement.setTitle(request.getTitle());
         announcement.setMessage(request.getMessage());
         announcement.setTargetType(request.getTargetType());
+        if (request.getCategory() != null) {
+            announcement.setCategory(request.getCategory());
+        }
+        if (request.getPriority() != null) {
+            announcement.setPriority(request.getPriority());
+        }
         announcement.setCreatedBy(username);
         announcement.setCreatedByRole(role);
 
@@ -61,17 +67,25 @@ public class AnnouncementService {
     // Update Announcement
     public AnnouncementResponseDTO updateAnnouncement(
             Long id,
-            AnnouncementRequestDTO request
+            AnnouncementRequestDTO request,
+            String username,
+            String role
     ) {
 
         Announcement announcement = announcementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Announcement not found"));
 
+        checkOwnershipOrAdmin(announcement, username, role);
+
         announcement.setTitle(request.getTitle());
         announcement.setMessage(request.getMessage());
         announcement.setTargetType(request.getTargetType());
-
-        // If announcement is for a specific hostel
+        if (request.getCategory() != null) {
+            announcement.setCategory(request.getCategory());
+        }
+        if (request.getPriority() != null) {
+            announcement.setPriority(request.getPriority());
+        }
         if (request.getTargetType() == Announcement.TargetType.HOSTEL) {
 
             if (request.getHostelId() == null) {
@@ -95,13 +109,30 @@ public class AnnouncementService {
         return convertToResponse(updatedAnnouncement);
     }
 
-    public void deleteAnnouncement(Long id) {
+    public void deleteAnnouncement(Long id, String username, String role) {
 
-        if (!announcementRepository.existsById(id)) {
-            throw new RuntimeException("Announcement not found");
-        }
+        Announcement announcement = announcementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Announcement not found"));
+
+        checkOwnershipOrAdmin(announcement, username, role);
 
         announcementRepository.deleteById(id);
+    }
+
+
+    // Ownership check: STUDENT_AFFAIRS and ADMIN can edit/delete any;
+    // SUB_WARDEN can only edit/delete their own.
+    private void checkOwnershipOrAdmin(
+            Announcement announcement,
+            String username,
+            String role
+    ) {
+        if (role.contains("STUDENT_AFFAIRS") || role.contains("ADMIN")) {
+            return;
+        }
+        if (!username.equals(announcement.getCreatedBy())) {
+            throw new RuntimeException("You can only edit your own announcements");
+        }
     }
 
 
@@ -140,6 +171,8 @@ public class AnnouncementService {
         response.setCreatedBy(announcement.getCreatedBy());
         response.setCreatedByRole(announcement.getCreatedByRole());
         response.setCreatedAt(announcement.getCreatedAt());
+        response.setCategory(announcement.getCategory());
+        response.setPriority(announcement.getPriority());
 
         if (announcement.getHostel() != null) {
 

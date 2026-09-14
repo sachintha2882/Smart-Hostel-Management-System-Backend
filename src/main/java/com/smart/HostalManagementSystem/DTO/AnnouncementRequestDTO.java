@@ -19,4 +19,8 @@ public class AnnouncementRequestDTO {
     private Announcement.TargetType targetType;
 
     private Long hostelId;
+
+    private String category;
+
+    private String priority;
 }

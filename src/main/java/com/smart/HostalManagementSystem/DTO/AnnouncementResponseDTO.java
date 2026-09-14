@@ -26,6 +26,10 @@ public class AnnouncementResponseDTO {
 
     private String hostelName;
 
+    private String category;
+
+    private String priority;
+
     private String createdBy;
 
     private String createdByRole;
