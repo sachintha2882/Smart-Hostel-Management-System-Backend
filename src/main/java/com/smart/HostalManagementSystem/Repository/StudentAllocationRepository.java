@@ -23,6 +23,7 @@ public interface StudentAllocationRepository extends JpaRepository<StudentAlloca
 
     List<StudentAllocation> findByStatus(String status);
 
+    List<StudentAllocation> findByRoom_Floor_Building_Hostel_Id(Long hostelId);
 
 
 

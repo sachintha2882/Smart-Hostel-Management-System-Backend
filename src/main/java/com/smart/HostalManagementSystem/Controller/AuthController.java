@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,7 +62,7 @@ public class AuthController {
 
         User user = new User();
 
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getUsername().trim());
 
         user.setPassword(
                 passwordEncoder.encode(request.getPassword())
@@ -89,13 +90,14 @@ public class AuthController {
             @RequestBody LoginRequestDTO request
     ){
 
+        String username = request.getUsername() == null ? "" : request.getUsername().trim();
 
         // Check username and password
         authenticationManager.authenticate(
 
                 new UsernamePasswordAuthenticationToken(
 
-                        request.getUsername(),
+                        username,
 
                         request.getPassword()
 
@@ -106,10 +108,7 @@ public class AuthController {
 
 
         // Get user details
-        User user =
-                userService.getUserByUsername(
-                        request.getUsername()
-                );
+        User user = userService.getUserByUsername(username);
 
 
 
@@ -139,19 +138,23 @@ public class AuthController {
 
                 user.isForcePasswordChange(),
 
-                user.getFullName()
+                displayName
 
 
 
         );
 
+    }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentials() {
+        return ResponseEntity.status(401).body("Invalid username or password");
     }
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(
             @RequestBody ChangePasswordRequestDTO requst
     ){
-        User user = userRepository.findByUsername(requst.getUsername())
+        User user = userRepository.findByUsernameIgnoreCase(requst.getUsername().trim())
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
 
         if(!passwordEncoder.matches(requst.getCurrentPassword(), user.getPassword())){

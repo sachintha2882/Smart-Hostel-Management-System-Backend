@@ -1,0 +1,253 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.4)
+
+2026-09-14T13:18:23.779+05:30  INFO 27608 --- [HostalManagementSystem] [           main] c.s.H.HostalManagementSystemApplication  : Starting HostalManagementSystemApplication v0.0.1-SNAPSHOT using Java 23.0.1 with PID 27608 (D:\Smart Hostel Management System\Smart-Hostel-Management-System-Backend\target\HostalManagementSystem-0.0.1-SNAPSHOT.jar started by MSI in D:\Smart Hostel Management System\Smart-Hostel-Management-System-Backend\target)
+2026-09-14T13:18:23.783+05:30  INFO 27608 --- [HostalManagementSystem] [           main] c.s.H.HostalManagementSystemApplication  : No active profile set, falling back to 1 default profile: "default"
+2026-09-14T13:18:24.798+05:30  INFO 27608 --- [HostalManagementSystem] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-14T13:18:24.868+05:30  INFO 27608 --- [HostalManagementSystem] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 62 ms. Found 10 JPA repository interfaces.
+2026-09-14T13:18:25.558+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-09-14T13:18:25.575+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-14T13:18:25.575+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.43]
+2026-09-14T13:18:25.608+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-14T13:18:25.610+05:30  INFO 27608 --- [HostalManagementSystem] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1764 ms
+2026-09-14T13:18:25.784+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-14T13:18:25.880+05:30  INFO 27608 --- [HostalManagementSystem] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.22.Final
+2026-09-14T13:18:25.938+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-09-14T13:18:26.290+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-14T13:18:26.325+05:30  INFO 27608 --- [HostalManagementSystem] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-14T13:18:26.495+05:30  INFO 27608 --- [HostalManagementSystem] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2d4e99de
+2026-09-14T13:18:26.497+05:30  INFO 27608 --- [HostalManagementSystem] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-14T13:18:26.544+05:30  WARN 27608 --- [HostalManagementSystem] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-09-14T13:18:26.567+05:30  INFO 27608 --- [HostalManagementSystem] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 5.5.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-14T13:18:27.548+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-14T13:18:27.718+05:30  INFO 27608 --- [HostalManagementSystem] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-14T13:18:28.383+05:30  INFO 27608 --- [HostalManagementSystem] [           main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-09-14T13:18:28.385+05:30  WARN 27608 --- [HostalManagementSystem] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-09-14T13:18:28.741+05:30  WARN 27608 --- [HostalManagementSystem] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-14T13:18:29.508+05:30  INFO 27608 --- [HostalManagementSystem] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-09-14T13:18:29.543+05:30  INFO 27608 --- [HostalManagementSystem] [           main] c.s.H.HostalManagementSystemApplication  : Started HostalManagementSystemApplication in 6.234 seconds (process running for 6.859)
+Hibernate: 
+    select
+        cm1_0.id,
+        cm1_0.created_at,
+        cm1_0.curries,
+        cm1_0.expires_at,
+        cm1_0.hostel_id,
+        cm1_0.main_dishes,
+        cm1_0.meal_type,
+        cm1_0.menu_items,
+        cm1_0.short_eats,
+        cm1_0.updated_at 
+    from
+        canteen_meals cm1_0 
+    where
+        cm1_0.expires_at<?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        upper(u1_0.username)=upper(?)
+Hibernate: 
+    select
+        h1_0.id,
+        h1_0.created_at,
+        h1_0.hostel_name,
+        h1_0.hostel_type,
+        h1_0.location,
+        h1_0.status,
+        h1_0.total_capacity,
+        h1_0.updated_at 
+    from
+        hostels h1_0 
+    where
+        h1_0.hostel_name=?
+2026-09-14T13:18:29.782+05:30  INFO 27608 --- [HostalManagementSystem] [           main] c.s.H.C.CanteenAssignmentInitializer     : Canteen01 is already assigned to Eliyakanda New Boy's Hostel
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        upper(u1_0.username)=upper(?)
+2026-09-14T13:18:29.788+05:30  INFO 27608 --- [HostalManagementSystem] [           main] c.s.H.C.CanteenAssignmentInitializer     : SubWarden01 is already assigned to Eliyakanda New Boy's Hostel
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+Hibernate: 
+    update
+        users 
+    set
+        enabled=?,
+        first_login=?,
+        force_password_change=?,
+        full_name=?,
+        hostel_id=?,
+        password=?,
+        role=?,
+        student_id=?,
+        username=? 
+    where
+        id=?
+2026-09-14T13:18:29.938+05:30  INFO 27608 --- [HostalManagementSystem] [           main] c.s.H.Config.AdminInitializer            : Admin account initialized successfully.
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        upper(u1_0.username)=upper(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+Hibernate: 
+    update
+        users 
+    set
+        enabled=?,
+        first_login=?,
+        force_password_change=?,
+        full_name=?,
+        hostel_id=?,
+        password=?,
+        role=?,
+        student_id=?,
+        username=? 
+    where
+        id=?
+Created/reset default maintenance user: maintenance1
+2026-09-14T13:18:42.311+05:30  INFO 27608 --- [HostalManagementSystem] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-14T13:18:42.311+05:30  INFO 27608 --- [HostalManagementSystem] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-14T13:18:42.313+05:30  INFO 27608 --- [HostalManagementSystem] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        upper(u1_0.username)=upper(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        upper(u1_0.username)=upper(?)
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.enabled,
+        u1_0.first_login,
+        u1_0.force_password_change,
+        u1_0.full_name,
+        u1_0.hostel_id,
+        u1_0.password,
+        u1_0.role,
+        u1_0.student_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        upper(u1_0.username)=upper(?)

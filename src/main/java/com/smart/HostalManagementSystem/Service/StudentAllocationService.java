@@ -14,6 +14,7 @@ import com.smart.HostalManagementSystem.Entity.StudentAllocation;
 import com.smart.HostalManagementSystem.Entity.User;
 import com.smart.HostalManagementSystem.Enums.Role;
 import com.smart.HostalManagementSystem.Repository.RoomRepository;
+import com.smart.HostalManagementSystem.Repository.FloorRepository;
 import com.smart.HostalManagementSystem.Repository.StudentAllocationRepository;
 import com.smart.HostalManagementSystem.Repository.StudentRepository;
 import com.smart.HostalManagementSystem.Repository.UserRepository;
@@ -51,6 +52,7 @@ public class StudentAllocationService {
 
     private final UserRepository userRepository;
 
+    private final FloorRepository floorRepository;
 
 
     public StudentAllocationService(
@@ -61,7 +63,8 @@ public class StudentAllocationService {
             UserService userService,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            FloorRepository floorRepository) {
 
         this.allocationRepository = allocationRepository;
         this.studentRepository = studentRepository;
@@ -71,6 +74,7 @@ public class StudentAllocationService {
         this.passwordEncoder = passwordEncoder;
         this.emailService =  emailService;
         this.userRepository = userRepository;
+        this.floorRepository = floorRepository;
     }
 
 
@@ -207,6 +211,71 @@ public class StudentAllocationService {
 
 
         return convertToDTO(updated);
+    }
+
+    public List<StudentAllocationResponseDTO> getSubWardenAllocations(String username) {
+        User user = getAssignedSubWarden(username);
+        return allocationRepository.findByRoom_Floor_Building_Hostel_Id(user.getHostel().getId())
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public StudentAllocationResponseDTO updateSubWardenStatus(Long id, String username, String status) {
+        StudentAllocation allocation = getSubWardenAllocation(id, username);
+        if (!"ACTIVE".equals(status) && !"INACTIVE".equals(status)) {
+            throw new IllegalArgumentException("Status must be ACTIVE or INACTIVE");
+        }
+        String previousStatus = allocation.getStatus();
+        if ("ACTIVE".equals(status) && !"ACTIVE".equals(previousStatus)
+                && allocationRepository.countByRoomIdAndStatus(allocation.getRoom().getId(), "ACTIVE")
+                >= allocation.getRoom().getCapacity()) {
+            throw new IllegalStateException("Room capacity is full");
+        }
+        if ("INACTIVE".equals(status) && "ACTIVE".equals(previousStatus)
+                && allocation.getRoom().getCurrentOccupancy() > 0) {
+            allocation.getRoom().setCurrentOccupancy(allocation.getRoom().getCurrentOccupancy() - 1);
+            roomRepository.save(allocation.getRoom());
+        } else if ("ACTIVE".equals(status) && !"ACTIVE".equals(previousStatus)) {
+            allocation.getRoom().setCurrentOccupancy(allocation.getRoom().getCurrentOccupancy() + 1);
+            roomRepository.save(allocation.getRoom());
+        }
+        allocation.setStatus(status);
+        allocation.setReleasedDate("INACTIVE".equals(status) ? LocalDate.now() : null);
+        return convertToDTO(allocationRepository.save(allocation));
+    }
+
+    public StudentAllocationResponseDTO removeForSubWarden(Long id, String username) {
+        StudentAllocation allocation = getSubWardenAllocation(id, username);
+        if ("ACTIVE".equals(allocation.getStatus()) && allocation.getRoom().getCurrentOccupancy() > 0) {
+            allocation.getRoom().setCurrentOccupancy(allocation.getRoom().getCurrentOccupancy() - 1);
+            roomRepository.save(allocation.getRoom());
+        }
+        allocation.setStatus("REMOVED");
+        allocation.setReleasedDate(LocalDate.now());
+        return convertToDTO(allocationRepository.save(allocation));
+    }
+
+    private StudentAllocation getSubWardenAllocation(Long id, String username) {
+        User user = getAssignedSubWarden(username);
+        StudentAllocation allocation = allocationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Allocation not found"));
+        if (allocation.getRoom().getFloor().getBuilding().getHostel().getId()
+                .equals(user.getHostel().getId())) {
+            return allocation;
+        }
+        throw new org.springframework.security.access.AccessDeniedException(
+                "You can only manage students in your assigned hostel");
+    }
+
+    private User getAssignedSubWarden(String username) {
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getRole() != Role.SUBWARDEN || user.getHostel() == null) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Sub Warden is not assigned to a hostel");
+        }
+        return user;
     }
 
     //STatus eka active da nedda kiyala balana mthode eka
@@ -386,7 +455,8 @@ public class StudentAllocationService {
     }
 
     public BulkAllocationResultDTO bulkAllocateFromExcel(
-            MultipartFile file, Long floorId, String academicYear,String expectedReleaseDate) throws Exception {
+            MultipartFile file, Long hostelId, Long buildingId, Long floorId,
+            String academicYear, String expectedReleaseDate) throws Exception {
 
         BulkAllocationResultDTO result = new BulkAllocationResultDTO();
 
@@ -395,8 +465,19 @@ public class StudentAllocationService {
         // 1. Excel eken students list eka parse karanawa
         List<Student> parsedStudents = excelParserService.parseStudentExcel(file);
 
-        // 2. Floor ekeම rooms tika ganawa (dan thiyena findByFloorId method eka use karanawa)
-        List<Room> floorRooms = roomRepository.findByFloorId(floorId);
+        Floor floor = floorRepository.findById(floorId)
+                .orElseThrow(() -> new IllegalArgumentException("Selected floor was not found"));
+        if (floor.getBuilding() == null
+                || floor.getBuilding().getId() == null
+                || !floor.getBuilding().getId().equals(buildingId)
+                || floor.getBuilding().getHostel() == null
+                || floor.getBuilding().getHostel().getId() == null
+                || !floor.getBuilding().getHostel().getId().equals(hostelId)) {
+            throw new IllegalArgumentException(
+                    "Selected floor does not belong to the selected building and hostel");
+        }
+
+        List<Room> floorRooms = roomRepository.findByFloorIdOrderByRoomNumberAsc(floorId);
 
         for (Student parsedStudent : parsedStudents) {
 
@@ -421,7 +502,8 @@ public class StudentAllocationService {
 
                 // 5. Available room ekක් floor eke hoyanawa (capacity full nathi ekක්)
                 Room availableRoom = floorRooms.stream()
-                        .filter(r -> r.getCurrentOccupancy() < r.getCapacity())
+                        .filter(r -> allocationRepository.countByRoomIdAndStatus(r.getId(), "ACTIVE")
+                                < r.getCapacity())
                         .findFirst()
                         .orElse(null);
 
@@ -445,7 +527,8 @@ public class StudentAllocationService {
 
                 // 7. Room occupancy update karanawa (in-memory list ekath update karanna one,
                 //    e nathnam passe students walata puranu occupancy count eka use wenawa)
-                availableRoom.setCurrentOccupancy(availableRoom.getCurrentOccupancy() + 1);
+                availableRoom.setCurrentOccupancy(
+                        (int) allocationRepository.countByRoomIdAndStatus(availableRoom.getId(), "ACTIVE"));
                 roomRepository.save(availableRoom);
 
                 // 8. User account eka thiyenawada balanawa, na nam create karanawa
