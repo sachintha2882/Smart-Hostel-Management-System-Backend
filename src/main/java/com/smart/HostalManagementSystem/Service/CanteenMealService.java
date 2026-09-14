@@ -70,6 +70,7 @@ public class CanteenMealService {
 
     public void delete(Long id) { repository.deleteById(id); }
 
+    @Transactional
     @Scheduled(fixedRate = 3600000)
     public void cleanupExpiredMeals() { repository.deleteByExpiresAtBefore(LocalDateTime.now()); }
 

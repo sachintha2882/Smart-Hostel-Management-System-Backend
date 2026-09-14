@@ -48,6 +48,8 @@ public class StudentAllocationController {
     @PostMapping("/bulk-upload")
     public ResponseEntity<?> bulkUpload(
             @RequestParam("file") MultipartFile file,
+            @RequestParam("hostelId") Long hostelId,
+            @RequestParam("buildingId") Long buildingId,
             @RequestParam("floorId") Long floorId,
             @RequestParam("academicYear") String academicYear,
             @RequestParam("expectedReleaseDate") String expectedReleaseDate
@@ -58,6 +60,8 @@ public class StudentAllocationController {
             BulkAllocationResultDTO result =
                     allocationService.bulkAllocateFromExcel(
                             file,
+                            hostelId,
+                            buildingId,
                             floorId,
                             academicYear,
                             expectedReleaseDate
@@ -95,6 +99,27 @@ public class StudentAllocationController {
 
         return allocationService.getAllAllocations();
 
+    }
+
+    @GetMapping("/subwarden")
+    public List<StudentAllocationResponseDTO> getSubWardenAllocations(
+            Authentication authentication) {
+        return allocationService.getSubWardenAllocations(authentication.getName());
+    }
+
+    @PutMapping("/subwarden/{id}/status")
+    public StudentAllocationResponseDTO updateSubWardenStatus(
+            @PathVariable Long id,
+            @RequestParam String status,
+            Authentication authentication) {
+        return allocationService.updateSubWardenStatus(id, authentication.getName(), status);
+    }
+
+    @PutMapping("/subwarden/{id}/remove")
+    public StudentAllocationResponseDTO removeForSubWarden(
+            @PathVariable Long id,
+            Authentication authentication) {
+        return allocationService.removeForSubWarden(id, authentication.getName());
     }
 
 

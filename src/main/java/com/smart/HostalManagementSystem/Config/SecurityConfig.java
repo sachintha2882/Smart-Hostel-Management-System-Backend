@@ -60,6 +60,18 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/staff-assignment/me")
+                        .hasAnyRole("SUBWARDEN", "WARDEN", "MAINTENANCE", "CANTEEN")
+                        .requestMatchers("/api/allocations/subwarden/**").hasRole("SUBWARDEN")
+                        .requestMatchers(HttpMethod.GET, "/api/allocations/my-room").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/allocations/**")
+                        .hasAnyRole("ADMIN", "STUDENT_AFFAIRS", "WARDEN")
+                        .requestMatchers(HttpMethod.POST, "/api/allocations/**")
+                        .hasAnyRole("ADMIN", "STUDENT_AFFAIRS")
+                        .requestMatchers(HttpMethod.PUT, "/api/allocations/**")
+                        .hasAnyRole("ADMIN", "STUDENT_AFFAIRS")
+                        .requestMatchers(HttpMethod.DELETE, "/api/allocations/**")
+                        .hasAnyRole("ADMIN", "STUDENT_AFFAIRS")
 
                         .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "STUDENT_AFFAIRS")
 

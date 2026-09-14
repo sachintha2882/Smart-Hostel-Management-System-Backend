@@ -27,23 +27,18 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (userRepository.existsByUsername(adminUsername)) {
-            log.info("Admin account already exists.");
-            return;
+        if (userRepository.findByUsername(adminUsername).isEmpty()) {
+            User admin = new User();
+            admin.setUsername(adminUsername);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
+            admin.setRole(Role.ADMIN);
+            admin.setEnabled(true);
+            admin.setFirstLogin(false);
+            admin.setForcePasswordChange(false);
+
+            userRepository.save(admin);
+
+            log.info("Admin account created successfully.");
         }
-
-        User admin = new User();
-        admin.setUsername(adminUsername);
-        admin.setPassword(passwordEncoder.encode(adminPassword));
-        admin.setRole(Role.ADMIN);
-        admin.setEnabled(true);
-
-        // First login password change
-        admin.setFirstLogin(true);
-        admin.setForcePasswordChange(true);
-
-        userRepository.save(admin);
-
-        log.info("Initial ADMIN account created successfully.");
     }
 }

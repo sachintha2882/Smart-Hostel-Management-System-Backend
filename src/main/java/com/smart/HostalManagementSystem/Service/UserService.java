@@ -29,7 +29,7 @@ public class UserService implements UserDetailsService {
             throws UsernameNotFoundException {
 
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username.trim())
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found")
                 );
@@ -49,7 +49,7 @@ public class UserService implements UserDetailsService {
     // Find user by username
     public User getUserByUsername(String username) {
 
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameIgnoreCase(username.trim())
                 .orElseThrow(() ->
                         new RuntimeException("User not found")
                 );
