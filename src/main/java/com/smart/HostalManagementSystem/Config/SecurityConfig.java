@@ -77,6 +77,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/complaints/*/forward", "/api/complaints/*/decline").hasAnyRole("SUBWARDEN", "SUB_WARDEN")
                         .requestMatchers(HttpMethod.PUT, "/api/complaints/*/complete", "/api/complaints/*/resolve").hasRole("MAINTENANCE")
 
+                        .requestMatchers(HttpMethod.GET, "/api/announcements/**").hasAnyRole("STUDENT", "STUDENT_AFFAIRS", "SUBWARDEN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/announcements").hasAnyRole("STUDENT_AFFAIRS", "SUBWARDEN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("STUDENT_AFFAIRS", "SUBWARDEN", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/announcements/**").hasAnyRole("ADMIN","STUDENT_AFFAIRS", "SUBWARDEN")
+
                         .anyRequest().authenticated()
                 )
 
