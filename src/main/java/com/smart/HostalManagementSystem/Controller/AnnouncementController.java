@@ -1,0 +1,94 @@
+package com.smart.HostalManagementSystem.Controller;
+
+import com.smart.HostalManagementSystem.DTO.AnnouncementRequestDTO;
+import com.smart.HostalManagementSystem.DTO.AnnouncementResponseDTO;
+import com.smart.HostalManagementSystem.Service.AnnouncementService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/announcements")
+@RequiredArgsConstructor
+@CrossOrigin
+public class AnnouncementController {
+
+    private final AnnouncementService announcementService;
+
+
+    // Create announcement
+    @PostMapping
+    public ResponseEntity<AnnouncementResponseDTO> createAnnouncement(
+            @RequestBody AnnouncementRequestDTO request,
+            Authentication authentication
+    ) {
+
+        String username = authentication.getName();
+
+        String role = authentication.getAuthorities()
+                .stream()
+                .findFirst()
+                .map(authority -> authority.getAuthority())
+                .orElse("");
+
+        AnnouncementResponseDTO response =
+                announcementService.createAnnouncement(
+                        request,
+                        username,
+                        role
+                );
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.CREATED
+        );
+    }
+
+
+    // Get all announcements
+    @GetMapping
+    public ResponseEntity<List<AnnouncementResponseDTO>> getAllAnnouncements() {
+
+        return ResponseEntity.ok(
+                announcementService.getAllAnnouncements()
+        );
+    }
+
+
+    // Get announcements of a hostel
+    @GetMapping("/hostel/{hostelId}")
+    public ResponseEntity<List<AnnouncementResponseDTO>> getHostelAnnouncements(
+            @PathVariable Long hostelId
+    ) {
+
+        return ResponseEntity.ok(
+                announcementService.getHostelAnnouncements(hostelId)
+        );
+    }
+    // Update announcement
+    @PutMapping("/{id}")
+    public ResponseEntity<AnnouncementResponseDTO> updateAnnouncement(
+            @PathVariable Long id,
+            @RequestBody AnnouncementRequestDTO request
+    ) {
+
+        AnnouncementResponseDTO response =
+                announcementService.updateAnnouncement(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnnouncement(
+            @PathVariable Long id
+    ) {
+
+        announcementService.deleteAnnouncement(id);
+
+        return ResponseEntity.noContent().build();
+    }
+}
