@@ -2,8 +2,12 @@ package com.smart.HostalManagementSystem.Repository;
 
 import com.smart.HostalManagementSystem.Entity.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -14,4 +18,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     List<Inventory> findByItemType(String itemType);
 
     boolean existsByItemTypeAndRoomId(String itemType, Long roomId);
+
+    // Bulk delete that bypasses the persistence context (avoids ObjectDeletedException).
+    @Modifying
+    @Query("DELETE FROM Inventory i WHERE i.room.id IN :roomIds")
+    void deleteByRoomIds(@Param("roomIds") Collection<Long> roomIds);
 }

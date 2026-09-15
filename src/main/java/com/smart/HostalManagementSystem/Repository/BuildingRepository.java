@@ -10,5 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface BuildingRepository
         extends JpaRepository<Building, Long> {
 
+    long countByHostelId(Long hostelId);
 
 }

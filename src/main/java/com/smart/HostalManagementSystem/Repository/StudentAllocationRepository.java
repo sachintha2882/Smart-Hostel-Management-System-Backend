@@ -3,8 +3,12 @@ package com.smart.HostalManagementSystem.Repository;
 
 import com.smart.HostalManagementSystem.Entity.StudentAllocation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -34,5 +38,10 @@ public interface StudentAllocationRepository extends JpaRepository<StudentAlloca
 
     // Check room occupancy
     long countByRoomIdAndStatus(Long roomId, String status);
+
+    // Bulk delete that bypasses the persistence context (avoids ObjectDeletedException).
+    @Modifying
+    @Query("DELETE FROM StudentAllocation a WHERE a.room.id IN :roomIds")
+    void deleteByRoomIds(@Param("roomIds") Collection<Long> roomIds);
 
 }

@@ -3,7 +3,12 @@ package com.smart.HostalManagementSystem.Service;
 import com.smart.HostalManagementSystem.DTO.HostelRequestDTO;
 import com.smart.HostalManagementSystem.DTO.HostelResponseDTO;
 import com.smart.HostalManagementSystem.Entity.Hostel;
+import com.smart.HostalManagementSystem.Repository.BuildingRepository;
+import com.smart.HostalManagementSystem.Repository.ComplaintRepository;
 import com.smart.HostalManagementSystem.Repository.HostelRepository;
+import com.smart.HostalManagementSystem.Repository.InventoryRepository;
+import com.smart.HostalManagementSystem.Repository.StudentAllocationRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +19,11 @@ import java.util.stream.Collectors;
 public class HostelService {
 
     private final HostelRepository hostelRepository;
+    private final BuildingRepository buildingRepository;
 
-    public HostelService(HostelRepository hostelRepository) {
+    public HostelService(HostelRepository hostelRepository, BuildingRepository buildingRepository) {
         this.hostelRepository = hostelRepository;
+        this.buildingRepository = buildingRepository;
     }
 
     // Create Hostel
@@ -80,6 +87,12 @@ public class HostelService {
 
         Hostel hostel = hostelRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Hostel not found"));
+
+        long buildingCount = buildingRepository.countByHostelId(id);
+        if (buildingCount > 0) {
+            throw new RuntimeException(
+                    "Cannot delete this hostel: it has " + buildingCount + " linked building(s). Delete those buildings first.");
+        }
 
         hostelRepository.delete(hostel);
     }
