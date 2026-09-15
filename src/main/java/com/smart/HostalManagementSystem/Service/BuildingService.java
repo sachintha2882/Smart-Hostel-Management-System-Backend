@@ -30,6 +30,8 @@ public class BuildingService {
 
     private final RoomRepository roomRepository;
 
+    private final HostelService hostelService;
+
 
 
     // CREATE BUILDING + AUTO CREATE FLOOR + ROOM
@@ -122,7 +124,9 @@ public class BuildingService {
 
         }
 
-
+        // All Floors and Rooms are now saved. Recompute the SYSTEM-CONTROLLED
+        // Hostel total capacity so it reflects this new Building.
+        hostelService.recalculateTotalCapacity(hostel.getId());
 
         return convertToDTO(savedBuilding);
 
@@ -203,6 +207,11 @@ public class BuildingService {
         Building updated =
                 buildingRepository.save(building);
 
+        // Hostel capacity is SYSTEM-CONTROLLED: keep it accurate after edit.
+        hostelService.recalculateTotalCapacity(
+                building.getHostel().getId()
+        );
+
 
 
         return convertToDTO(updated);
@@ -227,7 +236,14 @@ public class BuildingService {
                         );
 
 
+        // Capture the Hostel BEFORE the Building is deleted.
+        Long hostelId = building.getHostel().getId();
+
         buildingRepository.delete(building);
+
+        // Hostel capacity is SYSTEM-CONTROLLED: it must drop after deletion
+        // because this Building's Rooms are gone.
+        hostelService.recalculateTotalCapacity(hostelId);
 
     }
 

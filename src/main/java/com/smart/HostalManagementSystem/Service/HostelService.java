@@ -5,6 +5,7 @@ import com.smart.HostalManagementSystem.DTO.HostelResponseDTO;
 import com.smart.HostalManagementSystem.Entity.Hostel;
 import com.smart.HostalManagementSystem.Repository.HostelRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +27,10 @@ public class HostelService {
         hostel.setHostelName(dto.getHostelName());
         hostel.setHostelType(dto.getHostelType());
         hostel.setLocation(dto.getLocation());
-        hostel.setTotalCapacity(dto.getTotalCapacity());
+
+        // Hostel capacity is SYSTEM-CONTROLLED: derived from its Buildings.
+        // A new Hostel has no Buildings yet, so capacity is 0.
+        hostel.setTotalCapacity(0);
 
         Hostel savedHostel = hostelRepository.save(hostel);
 
@@ -52,6 +56,7 @@ public class HostelService {
     }
 
     // Update Hostel
+    @Transactional
     public HostelResponseDTO updateHostel(Long id, HostelRequestDTO dto) {
 
         Hostel hostel = hostelRepository.findById(id)
@@ -60,7 +65,10 @@ public class HostelService {
         hostel.setHostelName(dto.getHostelName());
         hostel.setHostelType(dto.getHostelType());
         hostel.setLocation(dto.getLocation());
-        hostel.setTotalCapacity(dto.getTotalCapacity());
+
+        // Hostel capacity is SYSTEM-CONTROLLED: never set from the DTO.
+        // Recompute it from the current Buildings so it stays accurate.
+        recalculateTotalCapacity(id);
 
         Hostel updatedHostel = hostelRepository.save(hostel);
 
@@ -74,6 +82,26 @@ public class HostelService {
                 .orElseThrow(() -> new RuntimeException("Hostel not found"));
 
         hostelRepository.delete(hostel);
+    }
+
+    // SYSTEM-CONTROLLED CAPACITY
+    // Hostel totalCapacity = sum of room capacities across all its Buildings
+    // (Building -> Floors -> Rooms).
+    @Transactional
+    public void recalculateTotalCapacity(Long hostelId) {
+
+        Hostel hostel = hostelRepository.findById(hostelId)
+                .orElseThrow(() -> new RuntimeException("Hostel not found"));
+
+        int totalCapacity = hostel.getBuildings().stream()
+                .flatMap(building -> building.getFloors().stream())
+                .flatMap(floor -> floor.getRooms().stream())
+                .mapToInt(room -> room.getCapacity() != null ? room.getCapacity() : 0)
+                .sum();
+
+        hostel.setTotalCapacity(totalCapacity);
+
+        hostelRepository.save(hostel);
     }
 
     // Convert Entity -> Response DTO

@@ -3,19 +3,24 @@ package com.smart.HostalManagementSystem.Service;
 import com.smart.HostalManagementSystem.DTO.AnnouncementRequestDTO;
 import com.smart.HostalManagementSystem.DTO.AnnouncementResponseDTO;
 import com.smart.HostalManagementSystem.Entity.Announcement;
+import com.smart.HostalManagementSystem.Entity.AnnouncementRead;
 import com.smart.HostalManagementSystem.Entity.Hostel;
+import com.smart.HostalManagementSystem.Repository.AnnouncementReadRepository;
 import com.smart.HostalManagementSystem.Repository.AnnouncementRepository;
 import com.smart.HostalManagementSystem.Repository.HostelRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AnnouncementService {
 
     private final AnnouncementRepository announcementRepository;
+    private final AnnouncementReadRepository announcementReadRepository;
     private final HostelRepository hostelRepository;
 
 
@@ -136,29 +141,90 @@ public class AnnouncementService {
     }
 
 
-    // Get all announcements
-    public List<AnnouncementResponseDTO> getAllAnnouncements() {
+    // Get all announcements (with per-user read state)
+    public List<AnnouncementResponseDTO> getAllAnnouncements(String username) {
+
+        Set<Long> readIds = getReadAnnouncementIds(username);
 
         return announcementRepository.findAll()
                 .stream()
-                .map(this::convertToResponse)
+                .map(announcement ->
+                        convertToResponse(announcement, readIds)
+                )
                 .toList();
     }
 
 
-    // Get announcements for a specific hostel
-    public List<AnnouncementResponseDTO> getHostelAnnouncements(Long hostelId) {
+    // Get announcements for a specific hostel (with per-user read state)
+    public List<AnnouncementResponseDTO> getHostelAnnouncements(Long hostelId, String username) {
+
+        Set<Long> readIds = getReadAnnouncementIds(username);
 
         return announcementRepository.findByHostelId(hostelId)
                 .stream()
-                .map(this::convertToResponse)
+                .map(announcement ->
+                        convertToResponse(announcement, readIds)
+                )
                 .toList();
+    }
+
+
+    // Mark an announcement as read for a user (idempotent)
+    public void markAsRead(Long announcementId, String username) {
+
+        Announcement announcement = announcementRepository.findById(announcementId)
+                .orElseThrow(() -> new RuntimeException("Announcement not found"));
+
+        boolean alreadyRead = announcementReadRepository
+                .findByAnnouncementIdAndUsername(announcementId, username)
+                .isPresent();
+
+        if (!alreadyRead) {
+
+            AnnouncementRead announcementRead = new AnnouncementRead();
+            announcementRead.setAnnouncement(announcement);
+            announcementRead.setUsername(username);
+
+            announcementReadRepository.save(announcementRead);
+        }
+    }
+
+
+    // Mark an announcement as unread for a user (idempotent)
+    public void markAsUnread(Long announcementId, String username) {
+
+        announcementRepository.findById(announcementId)
+                .orElseThrow(() -> new RuntimeException("Announcement not found"));
+
+        announcementReadRepository
+                .findByAnnouncementIdAndUsername(announcementId, username)
+                .ifPresent(announcementReadRepository::delete);
+    }
+
+
+    // Announcement ids already read by the user
+    private Set<Long> getReadAnnouncementIds(String username) {
+
+        return announcementReadRepository.findByUsername(username)
+                .stream()
+                .map(announcementRead ->
+                        announcementRead.getAnnouncement().getId()
+                )
+                .collect(Collectors.toSet());
     }
 
 
     // Convert Entity -> Response
     private AnnouncementResponseDTO convertToResponse(
             Announcement announcement
+    ) {
+
+        return convertToResponse(announcement, Set.of());
+    }
+
+    private AnnouncementResponseDTO convertToResponse(
+            Announcement announcement,
+            Set<Long> readIds
     ) {
 
         AnnouncementResponseDTO response =
@@ -173,6 +239,7 @@ public class AnnouncementService {
         response.setCreatedAt(announcement.getCreatedAt());
         response.setCategory(announcement.getCategory());
         response.setPriority(announcement.getPriority());
+        response.setRead(readIds.contains(announcement.getId()));
 
         if (announcement.getHostel() != null) {
 

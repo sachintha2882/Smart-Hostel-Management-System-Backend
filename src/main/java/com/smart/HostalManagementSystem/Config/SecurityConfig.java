@@ -89,6 +89,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/complaints/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/announcements/**").hasAnyRole("STUDENT", "STUDENT_AFFAIRS", "SUBWARDEN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/announcements/*/read", "/api/announcements/*/unread").hasAnyRole("STUDENT", "STUDENT_AFFAIRS", "SUBWARDEN", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/announcements").hasAnyRole("STUDENT_AFFAIRS", "SUBWARDEN")
                         .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("STUDENT_AFFAIRS", "SUBWARDEN", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/announcements/**").hasAnyRole("ADMIN","STUDENT_AFFAIRS", "SUBWARDEN")
