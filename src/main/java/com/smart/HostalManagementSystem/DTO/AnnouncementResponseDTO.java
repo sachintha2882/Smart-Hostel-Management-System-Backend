@@ -35,4 +35,6 @@ public class AnnouncementResponseDTO {
     private String createdByRole;
 
     private LocalDateTime createdAt;
+
+    private boolean read;
 }
