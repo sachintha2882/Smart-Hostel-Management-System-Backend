@@ -31,6 +31,12 @@ public class Announcement {
     @Column(nullable = false)
     private TargetType targetType;
 
+    @Column(length = 50)
+    private String category;
+
+    @Column(length = 50)
+    private String priority;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hostel_id")
     private Hostel hostel;

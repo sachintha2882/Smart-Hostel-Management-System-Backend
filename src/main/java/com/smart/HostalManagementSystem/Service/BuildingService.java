@@ -9,13 +9,15 @@ import com.smart.HostalManagementSystem.Repository.*;
 import com.smart.HostalManagementSystem.DTO.FloorResponseDTO;
 import com.smart.HostalManagementSystem.DTO.RoomResponseDTO;
 
-import  java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,14 @@ public class BuildingService {
     private final FloorRepository floorRepository;
 
     private final RoomRepository roomRepository;
+
+    private final HostelService hostelService;
+
+    private final StudentAllocationRepository studentAllocationRepository;
+
+    private final ComplaintRepository complaintRepository;
+
+    private final InventoryRepository inventoryRepository;
 
 
 
@@ -122,7 +132,9 @@ public class BuildingService {
 
         }
 
-
+        // All Floors and Rooms are now saved. Recompute the SYSTEM-CONTROLLED
+        // Hostel total capacity so it reflects this new Building.
+        hostelService.recalculateTotalCapacity(hostel.getId());
 
         return convertToDTO(savedBuilding);
 
@@ -203,6 +215,11 @@ public class BuildingService {
         Building updated =
                 buildingRepository.save(building);
 
+        // Hostel capacity is SYSTEM-CONTROLLED: keep it accurate after edit.
+        hostelService.recalculateTotalCapacity(
+                building.getHostel().getId()
+        );
+
 
 
         return convertToDTO(updated);
@@ -217,6 +234,7 @@ public class BuildingService {
 
     // DELETE BUILDING
 
+    @Transactional
     public void deleteBuilding(Long id){
 
 
@@ -227,7 +245,43 @@ public class BuildingService {
                         );
 
 
+        // Capture the owning Hostel and detach this Building from its
+        // collection. Hostel.buildings is cascade=ALL + orphanRemoval, so a
+        // re-merge of the Hostel (capacity recalc) would otherwise try to merge
+        // the deleted Building and fail with ObjectDeletedException.
+        Hostel hostel = building.getHostel();
+        if (hostel.getBuildings() != null) {
+            hostel.getBuildings().remove(building);
+        }
+
+        Long hostelId = hostel.getId();
+
+
+        // Rooms in this Building may be referenced by student allocations,
+        // complaints and inventory. Remove those rows first so the Building
+        // (and its Floors/Rooms) can be deleted in one go.
+        List<Long> roomIds =
+                building.getFloors() == null
+                        ? new ArrayList<>()
+                        : building.getFloors()
+                                .stream()
+                                .flatMap(floor -> floor.getRooms() == null ? Stream.empty() : floor.getRooms().stream())
+                                .map(Room::getId)
+                                .collect(Collectors.toList());
+
+        if (!roomIds.isEmpty()) {
+            studentAllocationRepository.deleteByRoomIds(roomIds);
+            complaintRepository.deleteByRoomIds(roomIds);
+            inventoryRepository.deleteByRoomIds(roomIds);
+        }
+
+
         buildingRepository.delete(building);
+        buildingRepository.flush();
+
+        // Hostel capacity is SYSTEM-CONTROLLED: it must drop after deletion
+        // because this Building's Rooms are gone.
+        hostelService.recalculateTotalCapacity(hostelId);
 
     }
 
